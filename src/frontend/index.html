@@ -691,38 +691,23 @@
             
             switch(tabName) {
                 case 'auth':
-                    if (!isAuthenticated) {
-                        document.getElementById('auth-card').classList.remove('hidden');
-                    } else {
-                        document.getElementById('user-card').classList.remove('hidden');
-                    }
+                    // Всегда показываем форму входа
+                    document.getElementById('auth-card').classList.remove('hidden');
                     break;
                 case 'programs':
-                    if (isAuthenticated) {
-                        document.getElementById('programs-card').classList.remove('hidden');
-                        loadPrograms();
-                    } else {
-                        showToast('Войдите в систему для доступа к программам', 'error');
-                        switchTab('auth');
-                    }
+                    // Показываем программы без проверки аутентификации
+                    document.getElementById('programs-card').classList.remove('hidden');
+                    loadPrograms();
                     break;
                 case 'my-courses':
-                    if (isAuthenticated) {
-                        document.getElementById('my-courses-card').classList.remove('hidden');
-                        loadMyCourses();
-                    } else {
-                        showToast('Войдите в систему для доступа к курсам', 'error');
-                        switchTab('auth');
-                    }
+                    // Показываем курсы без проверки аутентификации
+                    document.getElementById('my-courses-card').classList.remove('hidden');
+                    loadMyCourses();
                     break;
                 case 'admin':
-                    if (isAuthenticated && currentUser?.role === 'admin') {
-                        document.getElementById('admin-panel-card').classList.remove('hidden');
-                        loadAdminPrograms();
-                    } else {
-                        showToast('Доступ только для администраторов', 'error');
-                        switchTab('auth');
-                    }
+                    // Показываем админ панель без проверки аутентификации
+                    document.getElementById('admin-panel-card').classList.remove('hidden');
+                    loadAdminPrograms();
                     break;
             }
         }
@@ -849,9 +834,7 @@
         
         async function getCurrentUser() {
             try {
-                const response = await fetch(`${API_BASE}/api/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
+                const response = await fetch(`${API_BASE}/api/auth/me`);
                 
                 if (response.ok) {
                     currentUser = await response.json();
@@ -885,9 +868,7 @@
         // Achievement functions
         async function loadUserAchievements() {
             try {
-                const response = await fetch(`${API_BASE}/api/users/achievements`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
+                const response = await fetch(`${API_BASE}/api/users/achievements`);
                 
                 if (response.ok) {
                     const achievements = await response.json();
@@ -950,7 +931,6 @@
                 const response = await fetch(`${API_BASE}/api/maraphons/${programId}/enroll`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${currentToken}`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -974,9 +954,8 @@
         // Course functions
         async function loadMyCourses() {
             try {
-                const response = await fetch(`${API_BASE}/api/maraphons/my-enrollments`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
+                // Убираем заголовок авторизации
+                const response = await fetch(`${API_BASE}/api/maraphons/my-enrollments`);
                 
                 if (response.ok) {
                     const enrollments = await response.json();
@@ -1037,9 +1016,7 @@
         async function loadCourseContent(programId) {
             try {
                 // Load course days and current progress
-                const progressResponse = await fetch(`${API_BASE}/api/maraphons/${programId}/progress`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
+                const progressResponse = await fetch(`${API_BASE}/api/maraphons/${programId}/progress`);
                 
                 if (progressResponse.ok) {
                     const progress = await progressResponse.json();
@@ -1068,9 +1045,7 @@
         
         async function loadDayTasks(programId, day, existingContent) {
             try {
-                const response = await fetch(`${API_BASE}/api/maraphons/${programId}/days/${day}/tasks`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
+                const response = await fetch(`${API_BASE}/api/maraphons/${programId}/days/${day}/tasks`);
                 
                 if (response.ok) {
                     const tasks = await response.json();
@@ -1138,9 +1113,7 @@
             // Get current day dynamically
             let currentDay = 1;
             try {
-                const progressResponse = await fetch(`${API_BASE}/api/maraphons/${currentCourse.id}/progress`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
+                const progressResponse = await fetch(`${API_BASE}/api/maraphons/${currentCourse.id}/progress`);
                 if (progressResponse.ok) {
                     const progress = await progressResponse.json();
                     currentDay = progress.current_day;
@@ -1154,26 +1127,24 @@
                 if (selectedOption) {
                     answerIndex = parseInt(selectedOption.value);
                 } else {
-                    showTaskFeedback(taskId, 'Пожалуйста, выберите ответ', 'error');
+                    showToast('Пожалуйста, выберите ответ', 'error');
                     return;
                 }
             } else if (type === 'text') {
                 answerText = document.getElementById(`task_${taskId}_text`).value;
                 if (!answerText.trim()) {
-                    showTaskFeedback(taskId, 'Пожалуйста, введите ответ', 'error');
+                    showToast('Пожалуйста, введите ответ', 'error');
                     return;
                 }
             }
             
-            // Show loading state
             const submitButton = event.target;
             const originalText = submitButton.textContent;
-            submitButton.innerHTML = '<span class="loading"></span> Отправка...';
+            submitButton.textContent = 'Отправка...';
             submitButton.disabled = true;
             
             try {
                 const params = new URLSearchParams({
-                    newday_id: currentCourse.id,
                     day: currentDay,
                     task_id: taskId
                 });
@@ -1184,7 +1155,6 @@
                 const response = await fetch(`${API_BASE}/api/progress/answer?${params}`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${currentToken}`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -1285,9 +1255,7 @@
         // Admin functions
         async function loadAdminPrograms() {
             try {
-                const response = await fetch(`${API_BASE}/api/admin/maraphons`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
+                const response = await fetch(`${API_BASE}/api/admin/maraphons`);
                 
                 if (response.ok) {
                     const programs = await response.json();
@@ -1323,7 +1291,6 @@
                 const response = await fetch(`${API_BASE}/api/admin/maraphons`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${currentToken}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
