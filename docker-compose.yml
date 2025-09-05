@@ -1,0 +1,41 @@
+services:
+  backend:
+    build: ./src/backend
+    container_name: newday-backend
+    restart: always
+    env_file: .env
+    volumes:
+      - ./src/backend:/app
+      - ./src/backend/data:/app/data
+    # НЕ публикуем порт наружу — ходим через Traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.newday-backend.rule=Host(`api.newday.neyronikol.ru`)"
+      - "traefik.http.routers.newday-backend.entrypoints=websecure"
+      - "traefik.http.routers.newday-backend.tls=true"
+      - "traefik.http.services.newday-backend.loadbalancer.server.port=8001"
+      # Добавляем middleware для правильного перенаправления HTTP на HTTPS
+      - "traefik.http.routers.newday-backend.middlewares=redirect-to-https"
+    networks:
+      - n8n_default
+
+  frontend:
+    image: nginx:alpine
+    container_name: newday-frontend
+    restart: always
+    volumes:
+      - ./src/frontend:/usr/share/nginx/html:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.newday-frontend.rule=Host(`newday.neyronikol.ru`)"
+      - "traefik.http.routers.newday-frontend.entrypoints=websecure"
+      - "traefik.http.routers.newday-frontend.tls=true"
+      - "traefik.http.services.newday-frontend.loadbalancer.server.port=80"
+      # Добавляем middleware для правильного перенаправления HTTP на HTTPS
+      - "traefik.http.routers.newday-frontend.middlewares=redirect-to-https"
+    networks:
+      - n8n_default
+
+networks:
+  n8n_default:
+    external: true

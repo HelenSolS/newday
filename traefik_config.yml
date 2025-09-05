@@ -1,0 +1,31 @@
+# Traefik configuration for NewDay Platform
+http:
+  routers:
+    newday-frontend:
+      rule: "Host(`newday.neyronikol.ru`)"
+      entryPoints:
+        - "websecure"
+      service: "newday-frontend"
+      tls: {}
+    newday-backend:
+      rule: "Host(`api.newday.neyronikol.ru`)"
+      entryPoints:
+        - "websecure"
+      service: "newday-backend"
+      tls: {}
+  
+  services:
+    newday-frontend:
+      loadBalancer:
+        servers:
+          - url: "http://newday-frontend:80"
+    newday-backend:
+      loadBalancer:
+        servers:
+          - url: "http://newday-backend:8001"
+
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true

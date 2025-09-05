@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewDay Platform - Платформа нового дня</title>
+    <script src="config.js"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --dark-bg: #1a1a2e;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #2c3e50;
+            --text-secondary: #6c757d;
+            --border-radius: 16px;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+
+        .header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            opacity: 0.9;
+            font-weight: 300;
+            margin-bottom: 8px;
+        }
+
+        .header .tagline {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card h3 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-icon {
+            font-size: 1.8rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin: 8px 8px 8px 0;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: var(--transition);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-gradient);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 8px 25px rgba(67, 233, 123, 0.4);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 16px;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .program-item {
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+
+        .program-item:hover {
+            transform: translateX(4px);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        .course-item {
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+            border-radius: 12px;
+            border: 1px solid rgba(79, 172, 254, 0.2);
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+
+        .course-item:hover {
+            transform: translateX(4px);
+            border-color: rgba(79, 172, 254, 0.4);
+        }
+
+        .task-item {
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+            border-radius: 12px;
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            margin-bottom: 12px;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .task-item:hover {
+            transform: translateX(4px);
+            border-color: rgba(255, 193, 7, 0.4);
+        }
+
+        .task-item.completed {
+            background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(56, 249, 215, 0.1));
+            border-color: rgba(67, 233, 123, 0.3);
+        }
+
+        .task-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .task-status.completed {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .task-status.pending {
+            background: var(--secondary-gradient);
+            color: white;
+        }
+
+        .submission-feedback {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .feedback-success {
+            background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(56, 249, 215, 0.1));
+            color: #155724;
+            border: 1px solid rgba(67, 233, 123, 0.3);
+        }
+
+        .feedback-error {
+            background: linear-gradient(135deg, rgba(245, 87, 108, 0.1), rgba(240, 147, 251, 0.1));
+            color: #721c24;
+            border: 1px solid rgba(245, 87, 108, 0.3);
+        }
+
+        .achievement-badge {
+            display: inline-block;
+            background: var(--warning-gradient);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin: 4px;
+            box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status {
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-weight: 600;
+            border: 1px solid;
+        }
+
+        .status.success {
+            background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(56, 249, 215, 0.1));
+            color: #155724;
+            border-color: rgba(67, 233, 123, 0.3);
+        }
+
+        .status.error {
+            background: linear-gradient(135deg, rgba(245, 87, 108, 0.1), rgba(240, 147, 251, 0.1));
+            color: #721c24;
+            border-color: rgba(245, 87, 108, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 16px 0;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success-gradient);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: var(--transition);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid #43e97b;
+        }
+
+        .toast.error {
+            border-left: 4px solid #f5576c;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .card {
+                padding: 24px;
+            }
+
+            .header {
+                padding: 24px 0;
+                margin-bottom: 24px;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 8px 0;
+            }
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 12px;
+            backdrop-filter: blur(20px);
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle" onclick="toggleTheme()">
+        🌙
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🌅 NewDay Platform</h1>
+            <p class="subtitle">Платформа нового дня для личностного роста</p>
+            <p class="tagline">Трансформируйте свою жизнь с помощью персональных программ развития</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('auth')">🔐 Вход</button>
+            <button class="nav-tab" onclick="switchTab('programs')">🚀 Программы</button>
+            <button class="nav-tab" onclick="switchTab('my-courses')">📚 Мои курсы</button>
+            <button class="nav-tab" onclick="switchTab('admin')">⚙️ Админ</button>
+        </div>
+        
+        <div class="dashboard">
+            <!-- Authentication Card -->
+            <div class="card" id="auth-card">
+                <h3><span class="card-icon">🔐</span>Авторизация</h3>
+                <div id="auth-forms">
+                    <div id="login-form">
+                        <div class="form-group">
+                            <label for="username">Имя пользователя:</label>
+                            <input type="text" id="username" value="testuser" placeholder="Введите имя пользователя">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Пароль:</label>
+                            <input type="password" id="password" value="password123" placeholder="Введите пароль">
+                        </div>
+                        <button class="btn" onclick="login()">
+                            <span id="login-btn-text">Войти в систему</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="showRegisterForm()">Создать аккаунт</button>
+                    </div>
+                    
+                    <div id="register-form" class="hidden">
+                        <div class="form-group">
+                            <label for="reg-email">Email:</label>
+                            <input type="email" id="reg-email" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-username">Имя пользователя:</label>
+                            <input type="text" id="reg-username" placeholder="Уникальное имя">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-password">Пароль:</label>
+                            <input type="password" id="reg-password" placeholder="Надежный пароль">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-firstname">Имя:</label>
+                            <input type="text" id="reg-firstname" placeholder="Ваше имя">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-lastname">Фамилия:</label>
+                            <input type="text" id="reg-lastname" placeholder="Ваша фамилия">
+                        </div>
+                        <button class="btn" onclick="register()">
+                            <span id="register-btn-text">Зарегистрироваться</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="showLoginForm()">Назад к входу</button>
+                    </div>
+                </div>
+                <div id="auth-status"></div>
+            </div>
+            
+            <!-- User Info Card -->
+            <div class="card user-info hidden" id="user-card">
+                <h3><span class="card-icon">👤</span>Профиль пользователя</h3>
+                <div id="user-info"></div>
+                <button class="btn btn-secondary" onclick="logout()" style="margin-top: 20px;">Выйти из системы</button>
+            </div>
+            
+            <!-- Available Programs Card -->
+            <div class="card hidden" id="programs-card">
+                <h3><span class="card-icon">🚀</span>Доступные программы</h3>
+                <div id="programs-list"></div>
+                <button class="btn" onclick="loadPrograms()" style="margin-top: 20px;">Обновить список</button>
+            </div>
+            
+            <!-- My Courses Card -->
+            <div class="card hidden" id="my-courses-card">
+                <h3><span class="card-icon">📚</span>Мои программы</h3>
+                <div id="my-courses-list"></div>
+                <button class="btn" onclick="loadMyCourses()" style="margin-top: 20px;">Обновить прогресс</button>
+            </div>
+            
+            <!-- Course Content Card -->
+            <div class="card hidden" id="course-content-card">
+                <h3><span class="card-icon">📖</span>Содержание программы</h3>
+                <div id="course-content"></div>
+                <button class="btn btn-secondary" onclick="closeCourse()" style="margin-top: 20px;">Назад к программам</button>
+            </div>
+            
+            <!-- Admin Panel Card -->
+            <div class="card hidden" id="admin-panel-card">
+                <h3><span class="card-icon">⚙️</span>Панель администратора</h3>
+                <div id="admin-content">
+                    <h4>Управление программами</h4>
+                    <div id="admin-programs-list"></div>
+                    <button class="btn" onclick="loadAdminPrograms()">Загрузить программы</button>
+                    
+                    <h4 style="margin-top: 24px;">Создать новую программу</h4>
+                    <div class="form-group">
+                        <input type="text" id="new-program-title" placeholder="Название программы">
+                    </div>
+                    <div class="form-group">
+                        <textarea id="new-program-description" placeholder="Описание программы" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="new-program-duration" placeholder="Продолжительность (дни)" value="21">
+                    </div>
+                    <button class="btn" onclick="createProgram()">Создать программу</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Use the API base from config.js, fallback to localhost if not available
+        const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || 'http://45.153.189.27:8001';
+        let currentToken = null;
+        let currentUser = null;
+        let currentCourse = null;
+        let currentTheme = 'light';
+        
+        // Theme management
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.classList.toggle('dark-theme');
+            localStorage.setItem('newday-theme', currentTheme);
+            
+            const themeToggle = document.querySelector('.theme-toggle');
+            themeToggle.textContent = currentTheme === 'light' ? '🌙' : '☀️';
+        }
+        
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('newday-theme');
+            if (savedTheme) {
+                currentTheme = savedTheme;
+                if (currentTheme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                    document.querySelector('.theme-toggle').textContent = '☀️';
+                }
+            }
+        }
+        
+        // Tab management
+        function switchTab(tabName) {
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide cards based on tab and auth state
+            const isAuthenticated = currentToken !== null;
+            
+            // Hide all cards first
+            document.querySelectorAll('.card').forEach(card => card.classList.add('hidden'));
+            
+            switch(tabName) {
+                case 'auth':
+                    if (!isAuthenticated) {
+                        document.getElementById('auth-card').classList.remove('hidden');
+                    } else {
+                        document.getElementById('user-card').classList.remove('hidden');
+                    }
+                    break;
+                case 'programs':
+                    if (isAuthenticated) {
+                        document.getElementById('programs-card').classList.remove('hidden');
+                        loadPrograms();
+                    } else {
+                        showToast('Войдите в систему для доступа к программам', 'error');
+                        switchTab('auth');
+                    }
+                    break;
+                case 'my-courses':
+                    if (isAuthenticated) {
+                        document.getElementById('my-courses-card').classList.remove('hidden');
+                        loadMyCourses();
+                    } else {
+                        showToast('Войдите в систему для доступа к курсам', 'error');
+                        switchTab('auth');
+                    }
+                    break;
+                case 'admin':
+                    if (isAuthenticated && currentUser?.role === 'admin') {
+                        document.getElementById('admin-panel-card').classList.remove('hidden');
+                        loadAdminPrograms();
+                    } else {
+                        showToast('Доступ только для администраторов', 'error');
+                        switchTab('auth');
+                    }
+                    break;
+            }
+        }
+        
+        // Toast notifications
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.2rem;">${type === 'success' ? '✅' : '❌'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+        
+        // Authentication functions
+        function showRegisterForm() {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        }
+        
+        function showLoginForm() {
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        }
+        
+        async function register() {
+            const email = document.getElementById('reg-email').value;
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const firstName = document.getElementById('reg-firstname').value;
+            const lastName = document.getElementById('reg-lastname').value;
+            
+            if (!email || !username || !password || !firstName || !lastName) {
+                showToast('Пожалуйста, заполните все поля', 'error');
+                return;
+            }
+            
+            const registerBtn = document.getElementById('register-btn-text');
+            registerBtn.innerHTML = '<span class="loading"></span> Регистрация...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email, username, password,
+                        first_name: firstName,
+                        last_name: lastName
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast('Регистрация успешна! Теперь войдите в систему', 'success');
+                    showLoginForm();
+                    // Clear form
+                    document.getElementById('reg-email').value = '';
+                    document.getElementById('reg-username').value = '';
+                    document.getElementById('reg-password').value = '';
+                    document.getElementById('reg-firstname').value = '';
+                    document.getElementById('reg-lastname').value = '';
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка регистрации');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                registerBtn.textContent = 'Зарегистрироваться';
+            }
+        }
+        
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showToast('Введите имя пользователя и пароль', 'error');
+                return;
+            }
+            
+            const loginBtn = document.getElementById('login-btn-text');
+            loginBtn.innerHTML = '<span class="loading"></span> Вход...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentToken = data.access_token;
+                    localStorage.setItem('newday-token', currentToken);
+                    
+                    await getCurrentUser();
+                    
+                    showToast('Добро пожаловать в NewDay Platform!', 'success');
+                    
+                    // Switch to programs tab after login
+                    setTimeout(() => {
+                        document.querySelector('.nav-tab[onclick="switchTab(\'programs\')"]').click();
+                    }, 1000);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка входа');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                loginBtn.textContent = 'Войти в систему';
+            }
+        }
+        
+        async function getCurrentUser() {
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                
+                if (response.ok) {
+                    currentUser = await response.json();
+                    
+                    document.getElementById('user-info').innerHTML = `
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div style="width: 80px; height: 80px; background: var(--primary-gradient); border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+                                ${currentUser.first_name.charAt(0)}${currentUser.last_name.charAt(0)}
+                            </div>
+                            <h4 style="margin-bottom: 8px;">Добро пожаловать, ${currentUser.first_name} ${currentUser.last_name}!</h4>
+                        </div>
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                            <p><strong>📧 Email:</strong> ${currentUser.email}</p>
+                            <p><strong>👤 Роль:</strong> ${currentUser.role === 'admin' ? 'Администратор' : 'Пользователь'}</p>
+                            <p><strong>⭐ Подписка:</strong> ${currentUser.subscription_tier}</p>
+                        </div>
+                        <div id="user-achievements">
+                            <strong>🏆 Достижения:</strong>
+                            <div id="achievements-list">Загрузка...</div>
+                        </div>
+                    `;
+                    
+                    // Load user achievements
+                    await loadUserAchievements();
+                }
+            } catch (error) {
+                console.error('Ошибка получения информации о пользователе:', error);
+            }
+        }
+        
+        // Achievement functions
+        async function loadUserAchievements() {
+            try {
+                const response = await fetch(`${API_BASE}/api/users/achievements`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                
+                if (response.ok) {
+                    const achievements = await response.json();
+                    
+                    if (achievements.length === 0) {
+                        document.getElementById('achievements-list').innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">Пока нет достижений. Начните программу, чтобы получить первые награды!</p>';
+                    } else {
+                        document.getElementById('achievements-list').innerHTML = achievements.map(ach => `
+                            <span class="achievement-badge" title="${ach.achievement.description}">
+                                ${ach.achievement.icon_url ? `<img src="${ach.achievement.icon_url}" alt="" style="width: 16px; height: 16px; margin-right: 4px;">` : '🏆'}
+                                ${ach.achievement.title}
+                            </span>
+                        `).join('');
+                    }
+                } else {
+                    document.getElementById('achievements-list').innerHTML = '<p style="color: var(--text-secondary);">Ошибка загрузки достижений</p>';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки достижений:', error);
+                document.getElementById('achievements-list').innerHTML = '<p style="color: var(--text-secondary);">Ошибка загрузки достижений</p>';
+            }
+        }
+        
+        // Program functions
+        async function loadPrograms() {
+            try {
+                const response = await fetch(`${API_BASE}/api/maraphons/public`);
+                
+                if (response.ok) {
+                    const programs = await response.json();
+                    
+                    if (programs.length === 0) {
+                        document.getElementById('programs-list').innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px;">Программы не найдены. Скоро здесь появятся новые возможности для роста!</p>';
+                        return;
+                    }
+                    
+                    document.getElementById('programs-list').innerHTML = programs.map(program => `
+                        <div class="program-item">
+                            <h4 style="margin-bottom: 12px; color: var(--text-primary);">${program.title}</h4>
+                            <p style="margin-bottom: 16px; color: var(--text-secondary);">${program.description}</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <span style="font-size: 14px; color: var(--text-secondary);">
+                                    <strong>📅 Продолжительность:</strong> ${program.duration_days} дней
+                                </span>
+                                <span style="font-size: 14px; color: var(--text-secondary);">
+                                    <strong>⭐ Уровень:</strong> ${program.required_subscription_tier}
+                                </span>
+                            </div>
+                            <button class="btn btn-success" onclick="enrollInProgram(${program.id})">Начать программу</button>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                document.getElementById('programs-list').innerHTML = `<div class="status error">❌ Ошибка загрузки: ${error.message}</div>`;
+            }
+        }
+        
+        async function enrollInProgram(programId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/maraphons/${programId}/enroll`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showToast('Поздравляем! Вы записались на программу!', 'success');
+                    loadMyCourses();
+                    // Switch to my courses tab
+                    setTimeout(() => {
+                        document.querySelector('.nav-tab[onclick="switchTab(\'my-courses\')"]').click();
+                    }, 1500);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка записи на программу');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Course functions
+        async function loadMyCourses() {
+            try {
+                const response = await fetch(`${API_BASE}/api/maraphons/my-enrollments`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                
+                if (response.ok) {
+                    const enrollments = await response.json();
+                    
+                    if (enrollments.length === 0) {
+                        document.getElementById('my-courses-list').innerHTML = `
+                            <div style="text-align: center; padding: 40px;">
+                                <p style="color: var(--text-secondary); margin-bottom: 20px;">У вас пока нет активных программ.</p>
+                                <button class="btn" onclick="document.querySelector('.nav-tab[onclick=\\"switchTab(\\'programs\\')\\"]').click()">
+                                    Выбрать программу
+                                </button>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    document.getElementById('my-courses-list').innerHTML = enrollments.map(enrollment => `
+                        <div class="course-item">
+                            <h4 style="margin-bottom: 12px;">${enrollment.newday.title}</h4>
+                            <p style="margin-bottom: 16px; color: var(--text-secondary);">${enrollment.newday.description}</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${enrollment.completion_percentage}%"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0;">
+                                <span style="font-size: 14px;">
+                                    <strong>📊 Прогресс:</strong> ${Math.round(enrollment.completion_percentage)}%
+                                </span>
+                                <span style="font-size: 14px;">
+                                    <strong>📅 День:</strong> ${enrollment.current_day}/${enrollment.newday.duration_days}
+                                </span>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <span style="font-size: 14px; color: var(--text-secondary);">
+                                    <strong>🏆 Очки:</strong> ${enrollment.total_points}
+                                </span>
+                            </div>
+                            <button class="btn btn-success" onclick="openCourse(${enrollment.newday.id}, '${enrollment.newday.title}')">
+                                Продолжить программу
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                document.getElementById('my-courses-list').innerHTML = `<div class="status error">❌ Ошибка загрузки: ${error.message}</div>`;
+            }
+        }
+        
+        async function openCourse(programId, title) {
+            currentCourse = { id: programId, title: title };
+            
+            // Hide other cards and show course content
+            document.querySelectorAll('.card').forEach(card => card.classList.add('hidden'));
+            document.getElementById('course-content-card').classList.remove('hidden');
+            
+            await loadCourseContent(programId);
+        }
+        
+        async function loadCourseContent(programId) {
+            try {
+                // Load course days and current progress
+                const progressResponse = await fetch(`${API_BASE}/api/maraphons/${programId}/progress`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                
+                if (progressResponse.ok) {
+                    const progress = await progressResponse.json();
+                    
+                    let content = `
+                        <div style="text-align: center; margin-bottom: 32px;">
+                            <h4 style="margin-bottom: 16px;">${currentCourse.title}</h4>
+                            <div style="background: var(--primary-gradient); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                                <div style="font-size: 2rem; margin-bottom: 8px;">📅</div>
+                                <div style="font-size: 1.2rem; font-weight: 600;">День ${progress.current_day} из ${progress.total_days}</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress.completion_percentage}%"></div>
+                            </div>
+                            <p style="margin-top: 8px; color: var(--text-secondary);">Прогресс: ${Math.round(progress.completion_percentage)}%</p>
+                        </div>
+                    `;
+                    
+                    // Load tasks for current day
+                    await loadDayTasks(programId, progress.current_day, content);
+                }
+            } catch (error) {
+                document.getElementById('course-content').innerHTML = `<div class="status error">❌ Ошибка загрузки: ${error.message}</div>`;
+            }
+        }
+        
+        async function loadDayTasks(programId, day, existingContent) {
+            try {
+                const response = await fetch(`${API_BASE}/api/maraphons/${programId}/days/${day}/tasks`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                
+                if (response.ok) {
+                    const tasks = await response.json();
+                    
+                    let content = existingContent;
+                    content += `<h4 style="margin-bottom: 20px;">🎯 Задания дня ${day}:</h4>`;
+                    
+                    if (tasks.length === 0) {
+                        content += '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">Задания для этого дня еще не созданы.</div>';
+                    } else {
+                        content += tasks.map(task => `
+                            <div class="task-item" data-task-id="${task.id}">
+                                <h5 style="margin-bottom: 12px;">${task.title}</h5>
+                                <p style="margin-bottom: 8px; color: var(--text-secondary);"><strong>Тип:</strong> ${task.task_type}</p>
+                                ${task.description ? `<p style="margin-bottom: 16px;">${task.description}</p>` : ''}
+                                ${renderTaskInterface(task)}
+                            </div>
+                        `).join('');
+                    }
+                    
+                    document.getElementById('course-content').innerHTML = content;
+                }
+            } catch (error) {
+                document.getElementById('course-content').innerHTML = existingContent + `<div class="status error">❌ Ошибка загрузки заданий: ${error.message}</div>`;
+            }
+        }
+        
+        function renderTaskInterface(task) {
+            let interface = '';
+            
+            if (task.task_type === 'multiple_choice' && task.content_data?.options) {
+                interface += '<div class="form-group">';
+                interface += '<label>Выберите ответ:</label>';
+                interface += '<div style="margin-top: 12px;">';
+                task.content_data.options.forEach((option, index) => {
+                    interface += `
+                        <label style="display: block; margin: 8px 0; padding: 12px; background: rgba(102, 126, 234, 0.05); border-radius: 8px; cursor: pointer; transition: var(--transition);" onmouseover="this.style.background='rgba(102, 126, 234, 0.1)'" onmouseout="this.style.background='rgba(102, 126, 234, 0.05)'">
+                            <input type="radio" name="task_${task.id}" value="${index}" style="margin-right: 12px;">
+                            ${option}
+                        </label>
+                    `;
+                });
+                interface += '</div>';
+                interface += `<button class="btn" onclick="submitTaskAnswer(${task.id}, 'multiple_choice')" style="margin-top: 16px;">Отправить ответ</button>`;
+                interface += '</div>';
+            } else if (task.task_type === 'text_question') {
+                interface += `
+                    <div class="form-group">
+                        <label>Ваш ответ:</label>
+                        <textarea id="task_${task.id}_text" placeholder="Поделитесь своими мыслями..." rows="4"></textarea>
+                        <button class="btn" onclick="submitTaskAnswer(${task.id}, 'text')" style="margin-top: 12px;">Отправить ответ</button>
+                    </div>
+                `;
+            } else {
+                interface += `<button class="btn btn-success" onclick="submitTaskAnswer(${task.id}, 'completion')">Отметить как выполненное</button>`;
+            }
+            
+            return interface;
+        }
+        
+        async function submitTaskAnswer(taskId, type) {
+            let answerText = null;
+            let answerIndex = null;
+            
+            // Get current day dynamically
+            let currentDay = 1;
+            try {
+                const progressResponse = await fetch(`${API_BASE}/api/maraphons/${currentCourse.id}/progress`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (progressResponse.ok) {
+                    const progress = await progressResponse.json();
+                    currentDay = progress.current_day;
+                }
+            } catch (error) {
+                console.warn('Could not get current day, using day 1');
+            }
+            
+            if (type === 'multiple_choice') {
+                const selectedOption = document.querySelector(`input[name="task_${taskId}"]:checked`);
+                if (selectedOption) {
+                    answerIndex = parseInt(selectedOption.value);
+                } else {
+                    showTaskFeedback(taskId, 'Пожалуйста, выберите ответ', 'error');
+                    return;
+                }
+            } else if (type === 'text') {
+                answerText = document.getElementById(`task_${taskId}_text`).value;
+                if (!answerText.trim()) {
+                    showTaskFeedback(taskId, 'Пожалуйста, введите ответ', 'error');
+                    return;
+                }
+            }
+            
+            // Show loading state
+            const submitButton = event.target;
+            const originalText = submitButton.textContent;
+            submitButton.innerHTML = '<span class="loading"></span> Отправка...';
+            submitButton.disabled = true;
+            
+            try {
+                const params = new URLSearchParams({
+                    newday_id: currentCourse.id,
+                    day: currentDay,
+                    task_id: taskId
+                });
+                
+                if (answerText) params.append('answer_text', answerText);
+                if (answerIndex !== null) params.append('answer_index', answerIndex);
+                
+                const response = await fetch(`${API_BASE}/api/progress/answer?${params}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    const score = result.score || 0;
+                    const isPassed = result.is_passed || false;
+                    
+                    let message = '✅ Отлично! Ответ принят!';
+                    if (score !== undefined) {
+                        message += ` Оценка: ${Math.round(score * 100)}%`;
+                    }
+                    if (isPassed) {
+                        message += ' 🎉 Задание выполнено успешно!';
+                        markTaskAsCompleted(taskId);
+                    }
+                    
+                    showTaskFeedback(taskId, message, 'success');
+                    showToast('Задание выполнено!', 'success');
+                    
+                    // Reload course content to update progress
+                    setTimeout(async () => {
+                        await loadCourseContent(currentCourse.id);
+                    }, 2000);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка отправки ответа');
+                }
+            } catch (error) {
+                showTaskFeedback(taskId, `❌ ${error.message}`, 'error');
+                showToast(error.message, 'error');
+            } finally {
+                // Restore button state
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }
+        }
+        
+        function showTaskFeedback(taskId, message, type) {
+            const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+            
+            if (!taskElement) return;
+            
+            // Remove existing feedback
+            const existingFeedback = taskElement.querySelector('.submission-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+            
+            // Add new feedback
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = `submission-feedback feedback-${type}`;
+            feedbackDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.2rem;">${type === 'success' ? '✅' : '❌'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            taskElement.appendChild(feedbackDiv);
+            
+            // Auto-remove feedback after 5 seconds if it's success
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (feedbackDiv.parentNode) {
+                        feedbackDiv.remove();
+                    }
+                }, 5000);
+            }
+        }
+        
+        function markTaskAsCompleted(taskId) {
+            const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+            
+            if (taskElement) {
+                taskElement.classList.add('completed');
+                
+                // Add completion status badge
+                let statusBadge = taskElement.querySelector('.task-status');
+                if (!statusBadge) {
+                    statusBadge = document.createElement('div');
+                    statusBadge.className = 'task-status';
+                    taskElement.appendChild(statusBadge);
+                }
+                
+                statusBadge.className = 'task-status completed';
+                statusBadge.textContent = '✓ Выполнено';
+            }
+        }
+        
+        function closeCourse() {
+            document.querySelectorAll('.card').forEach(card => card.classList.add('hidden'));
+            document.getElementById('my-courses-card').classList.remove('hidden');
+            currentCourse = null;
+        }
+        
+        // Admin functions
+        async function loadAdminPrograms() {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/maraphons`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                
+                if (response.ok) {
+                    const programs = await response.json();
+                    document.getElementById('admin-programs-list').innerHTML = programs.map(program => `
+                        <div class="program-item">
+                            <h4>ID: ${program.id} - ${program.title}</h4>
+                            <p style="color: var(--text-secondary);">${program.description}</p>
+                            <div style="margin-top: 12px;">
+                                <span style="font-size: 14px; color: var(--text-secondary);">
+                                    <strong>Дней:</strong> ${program.duration_days} | 
+                                    <strong>Активен:</strong> ${program.is_active ? 'Да' : 'Нет'}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                document.getElementById('admin-programs-list').innerHTML = `<div class="status error">❌ Ошибка загрузки: ${error.message}</div>`;
+            }
+        }
+        
+        async function createProgram() {
+            const title = document.getElementById('new-program-title').value;
+            const description = document.getElementById('new-program-description').value;
+            const duration = parseInt(document.getElementById('new-program-duration').value);
+            
+            if (!title || !duration) {
+                showToast('Пожалуйста, заполните название и продолжительность', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/maraphons`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        description: description,
+                        duration_days: duration
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast('Программа создана успешно!', 'success');
+                    document.getElementById('new-program-title').value = '';
+                    document.getElementById('new-program-description').value = '';
+                    document.getElementById('new-program-duration').value = '21';
+                    loadAdminPrograms();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка создания программы');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+        
+        function logout() {
+            currentToken = null;
+            currentUser = null;
+            currentCourse = null;
+            localStorage.removeItem('newday-token');
+            
+            // Reset UI
+            document.querySelectorAll('.card').forEach(card => card.classList.add('hidden'));
+            document.getElementById('auth-card').classList.remove('hidden');
+            document.getElementById('auth-status').innerHTML = '';
+            
+            // Reset nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector('.nav-tab[onclick="switchTab(\'auth\')"]').classList.add('active');
+            
+            // Reset form
+            document.getElementById('username').value = 'testuser';
+            document.getElementById('password').value = 'password123';
+            showLoginForm();
+            
+            showToast('Вы вышли из системы', 'success');
+        }
+        
+        // Initialize app
+        function initApp() {
+            loadTheme();
+            
+            // Check for saved token
+            const savedToken = localStorage.getItem('newday-token');
+            if (savedToken) {
+                currentToken = savedToken;
+                getCurrentUser().then(() => {
+                    // Auto-switch to programs tab if logged in
+                    document.querySelector('.nav-tab[onclick="switchTab(\'programs\')"]').click();
+                });
+            }
+        }
+        
+        // Start the app
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

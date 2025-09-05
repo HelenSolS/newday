@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Simple deployment script for NewDay Platform
+echo "Starting NewDay Platform deployment..."
+
+# Create deployment package
+echo "Creating deployment package..."
+tar -czf newday-platform-deploy.tar.gz src docker-compose.yml .env server_deploy.sh
+
+# Copy to server
+echo "Copying deployment package to server..."
+scp newday-platform-deploy.tar.gz root@45.153.189.27:/root/
+
+# SSH to server and deploy
+echo "Deploying on server..."
+ssh root@45.153.189.27 << 'ENDSSH'
+# Create directory and extract
+sudo mkdir -p /var/www/newday
+sudo mv /root/newday-platform-deploy.tar.gz /var/www/newday/
+cd /var/www/newday
+tar -xzf newday-platform-deploy.tar.gz
+
+# Make scripts executable
+chmod +x server_deploy.sh
+chmod +x src/backend/*.sh
+
+# Run deployment script
+./server_deploy.sh
+ENDSSH
+
+echo "Deployment completed!"

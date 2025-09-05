@@ -1,0 +1,1 @@
+window.APP_CONFIG = { API_BASE: "https://api.newday.neyronikol.ru" };
