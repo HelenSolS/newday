@@ -707,6 +707,12 @@
         
         // Toast notifications
         function showToast(message, type = 'success') {
+            // Один тост за раз, чтобы не захламлять DOM
+            const existing = document.querySelector('.toast');
+            if (existing && existing.parentNode) {
+                existing.parentNode.removeChild(existing);
+            }
+
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
@@ -718,11 +724,12 @@
             
             document.body.appendChild(toast);
             
-            setTimeout(() => toast.classList.add('show'), 100);
+            // Плавное появление и быстрое скрытие
+            setTimeout(() => toast.classList.add('show'), 50);
             setTimeout(() => {
                 toast.classList.remove('show');
-                setTimeout(() => document.body.removeChild(toast), 300);
-            }, 3000);
+                setTimeout(() => toast.parentNode && toast.parentNode.removeChild(toast), 250);
+            }, 2200);
         }
         
         // Authentication functions
@@ -862,7 +869,7 @@
                     await loadUserAchievements();
                 }
             } catch (error) {
-                console.error('Ошибка получения информации о пользователе:', error);
+                // В демо-режиме или при временных ошибках просто тихо игнорируем
             }
         }
         
