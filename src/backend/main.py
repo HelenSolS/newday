@@ -10,11 +10,16 @@ from course_endpoints import router as course_router
 app = FastAPI(
     title="NewDay Platform API",
     description="API for the NewDay Platform with n8n integration",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # CORS configuration
-origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
+_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+if _origins_env.strip():
+    origins = [origin.strip() for origin in _origins_env.split(",") if origin.strip()]
+else:
+    # Development‑friendly default: allow all origins when ALLOWED_ORIGINS is not set
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
