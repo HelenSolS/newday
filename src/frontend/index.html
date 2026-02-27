@@ -648,12 +648,32 @@
     </div>
     
     <script>
-        // Use the API base from config.js, fallback to localhost if not available
-        const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || 'http://45.153.189.27:8001';
+        // Use the API base and mock settings from config.js
+        const APP_CONFIG = window.APP_CONFIG || {};
+        const API_BASE = APP_CONFIG.API_BASE || 'http://127.0.0.1:8001';
+        const MOCK_MODE = !!APP_CONFIG.MOCK_MODE;
         let currentToken = null;
         let currentUser = null;
         let currentCourse = null;
         let currentTheme = 'light';
+        
+        // Simple mock data for demo mode (when backend is not available)
+        const MOCK_PROGRAMS = [
+            {
+                id: 1,
+                title: 'Демо‑программа: 10‑дневный антистресс‑вебинар',
+                description: 'Пример программы: вода, питание, движение, осознанность и вечерние ритуалы.',
+                duration_days: 10,
+                required_subscription_tier: 'free',
+            },
+            {
+                id: 2,
+                title: 'Демо‑программа: Лёгкий старт',
+                description: 'Короткая программа для демонстрации интерфейса и прогресса.',
+                duration_days: 5,
+                required_subscription_tier: 'free',
+            },
+        ];
         
         // Theme management
         function toggleTheme() {
@@ -894,6 +914,31 @@
         
         // Program functions
         async function loadPrograms() {
+            if (MOCK_MODE) {
+                if (!MOCK_PROGRAMS.length) {
+                    document.getElementById('programs-list').innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px;">Программы появятся после подключения сервера.</p>';
+                    return;
+                }
+
+                document.getElementById('programs-list').innerHTML = MOCK_PROGRAMS.map(program => `
+                    <div class="program-item">
+                        <h4 style="margin-bottom: 12px; color: var(--text-primary);">${program.title}</h4>
+                        <p style="margin-bottom: 16px; color: var(--text-secondary);">${program.description}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <span style="font-size: 14px; color: var(--text-secondary);">
+                                <strong>📅 Продолжительность:</strong> ${program.duration_days} дней
+                            </span>
+                            <span style="font-size: 14px; color: var(--text-secondary);">
+                                <strong>⭐ Уровень:</strong> ${program.required_subscription_tier}
+                            </span>
+                        </div>
+                        <button class="btn btn-success" onclick="enrollInProgram(${program.id})">Начать программу (демо)</button>
+                    </div>
+                `).join('');
+
+                return;
+            }
+
             try {
                 const response = await fetch(`${API_BASE}/api/maraphons/public`);
                 
@@ -927,6 +972,12 @@
         }
         
         async function enrollInProgram(programId) {
+            if (MOCK_MODE) {
+                const program = MOCK_PROGRAMS.find(p => p.id === programId);
+                showToast(`Демо‑запись на программу${program ? ` «${program.title}»` : ''} выполнена.`, 'success');
+                // В демо‑режиме просто показываем сообщение и не трогаем реальные курсы
+                return;
+            }
             try {
                 const response = await fetch(`${API_BASE}/api/maraphons/${programId}/enroll`, {
                     method: 'POST',
@@ -953,6 +1004,19 @@
         
         // Course functions
         async function loadMyCourses() {
+            if (MOCK_MODE) {
+                document.getElementById('my-courses-list').innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                            В демо‑режиме прогресс не сохраняется. Подключим сервер — и здесь появятся ваши реальные программы.
+                        </p>
+                        <button class="btn" onclick="document.querySelector('.nav-tab[onclick=\\"switchTab(\\'programs\\')\\"]').click()">
+                            Посмотреть демо‑программы
+                        </button>
+                    </div>
+                `;
+                return;
+            }
             try {
                 // Убираем заголовок авторизации
                 const response = await fetch(`${API_BASE}/api/maraphons/my-enrollments`);
@@ -1254,6 +1318,15 @@
         
         // Admin functions
         async function loadAdminPrograms() {
+            if (MOCK_MODE) {
+                document.getElementById('admin-programs-list').innerHTML = `
+                    <div class="status warning" style="border-color: rgba(255,193,7,0.5);">
+                        ⚠️ Панель администратора сейчас работает в демо‑режиме без подключения к базе данных.
+                        После запуска сервера здесь появится реальный список программ.
+                    </div>
+                `;
+                return;
+            }
             try {
                 const response = await fetch(`${API_BASE}/api/admin/maraphons`);
                 
