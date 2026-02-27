@@ -764,6 +764,10 @@
         }
         
         async function register() {
+            if (MOCK_MODE) {
+                showToast('Демо-режим: регистрация будет доступна после подключения сервера.', 'error');
+                return;
+            }
             const email = document.getElementById('reg-email').value;
             const username = document.getElementById('reg-username').value;
             const password = document.getElementById('reg-password').value;
@@ -810,6 +814,10 @@
         }
         
         async function login() {
+            if (MOCK_MODE) {
+                showToast('Демо-режим: авторизация будет работать после подключения сервера.', 'error');
+                return;
+            }
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
