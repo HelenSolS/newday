@@ -1,0 +1,213 @@
+{
+  "name": "Lead7 — завершить 7 дней и выдать промокод",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead7/finish",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-finish",
+      "name": "Webhook POST finish",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "lead7-finish-post"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT u.id FROM marathon_user u\nWHERE u.external_id = $1\n  AND (SELECT COUNT(*) FROM lead7_day_progress p WHERE p.user_id = u.id AND p.is_test_passed = true) = 7;",
+        "options": {
+          "queryParams": "={{ [$json.body.external_id] }}"
+        }
+      },
+      "id": "postgres-check-7-days",
+      "name": "Проверить 7 дней пройдены",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [460, 280],
+      "credentials": {
+        "postgres": {
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const first = $input.first();\nconst id = (first && first.json && first.json.id) ? first.json.id : null;\nreturn [{ json: { id } }];"
+      },
+      "id": "normalize",
+      "name": "Один элемент с id",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [580, 280]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-user",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-ready",
+      "name": "Участник прошёл 7 дней?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const userId = $input.first().json.id;\nconst code = 'MARATHON10-' + Math.random().toString(36).slice(2, 10).toUpperCase();\nreturn { json: { user_id: userId, code } };"
+      },
+      "id": "code-generate",
+      "name": "Сгенерировать промокод",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1020, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO promo_code (code, discount_percent, for_product, generated_for_user_id)\nVALUES ($1, 10, 'big_marathon', $2::integer)\nRETURNING code, discount_percent;",
+        "options": {
+          "queryParams": "={{ [$json.code, $json.user_id] }}"
+        }
+      },
+      "id": "postgres-insert-promo",
+      "name": "Записать промокод в БД",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1240, 200],
+      "credentials": {
+        "postgres": {
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": true, \"promo_code\": $json.code, \"discount_percent\": $json.discount_percent } }}",
+        "options": {}
+      },
+      "id": "respond-success",
+      "name": "Ответ успех",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1460, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 400,
+        "responseBody": "={{ { \"ok\": false, \"error\": \"not_all_days_completed\" } }}",
+        "options": {}
+      },
+      "id": "respond-error",
+      "name": "Ответ ошибка",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1020, 400]
+    }
+  ],
+  "connections": {
+    "Webhook POST finish": {
+      "main": [
+        [
+          {
+            "node": "Проверить 7 дней пройдены",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверить 7 дней пройдены": {
+      "main": [
+        [
+          {
+            "node": "Один элемент с id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Один элемент с id": {
+      "main": [
+        [
+          {
+            "node": "Участник прошёл 7 дней?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Участник прошёл 7 дней?": {
+      "main": [
+        [
+          {
+            "node": "Сгенерировать промокод",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ответ ошибка",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сгенерировать промокод": {
+      "main": [
+        [
+          {
+            "node": "Записать промокод в БД",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Записать промокод в БД": {
+      "main": [
+        [
+          {
+            "node": "Ответ успех",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "lead7-finish-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

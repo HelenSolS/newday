@@ -1,0 +1,111 @@
+{
+  "name": "Lead7 — сохранить прогресс дня",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead7/progress",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-save",
+      "name": "Webhook POST progress",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "lead7-progress-post"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO marathon_user (external_id, channel)\nVALUES ($1, $2)\nON CONFLICT (external_id) DO UPDATE SET external_id = EXCLUDED.external_id\nRETURNING id;",
+        "options": {
+          "queryParams": "={{ [$json.body.external_id, $json.body.channel || 'web'] }}"
+        }
+      },
+      "id": "postgres-ensure-user",
+      "name": "Найти или создать пользователя",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [460, 280],
+      "credentials": {
+        "postgres": {
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO lead7_day_progress (user_id, day_number, is_test_passed, completed_at)\nVALUES (\n  (SELECT id FROM marathon_user WHERE external_id = $1 LIMIT 1),\n  $2::smallint,\n  $3::boolean,\n  CASE WHEN $3::boolean THEN now() ELSE NULL END\n)\nON CONFLICT (user_id, day_number) DO UPDATE SET\n  is_test_passed = EXCLUDED.is_test_passed,\n  completed_at = EXCLUDED.completed_at;",
+        "options": {
+          "queryParams": "={{ [$('Webhook POST progress').first().json.body.external_id, $('Webhook POST progress').first().json.body.day_number, $('Webhook POST progress').first().json.body.is_test_passed] }}"
+        }
+      },
+      "id": "postgres-upsert-progress",
+      "name": "Сохранить прогресс дня",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [680, 300],
+      "credentials": {
+        "postgres": {
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": true, \"user_id\": $('Найти или создать пользователя').first().json.id } }}",
+        "options": {}
+      },
+      "id": "respond-save",
+      "name": "Ответить клиенту",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook POST progress": {
+      "main": [
+        [
+          {
+            "node": "Найти или создать пользователя",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Найти или создать пользователя": {
+      "main": [
+        [
+          {
+            "node": "Сохранить прогресс дня",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сохранить прогресс дня": {
+      "main": [
+        [
+          {
+            "node": "Ответить клиенту",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "lead7-save-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

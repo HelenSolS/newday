@@ -515,6 +515,7 @@
             <button class="nav-tab active" onclick="switchTab('auth')">🔐 Вход</button>
             <button class="nav-tab" onclick="switchTab('programs')">🚀 Программы</button>
             <button class="nav-tab" onclick="switchTab('my-courses')">📚 Мои курсы</button>
+            <button class="nav-tab" onclick="switchTab('lead7')">🎯 Марафон 7 дней</button>
             <button class="nav-tab" onclick="switchTab('admin')">⚙️ Админ</button>
         </div>
         
@@ -589,6 +590,16 @@
                 <button class="btn" onclick="loadMyCourses()" style="margin-top: 20px;">Обновить прогресс</button>
             </div>
             
+            <!-- Lead7 Marathon Card -->
+            <div class="card hidden" id="lead7-card">
+                <h3><span class="card-icon">🎯</span>Марафон 7 дней — антистресс</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">Прогресс сохраняется в облаке. Проходите дни по порядку и получите промокод 10% в конце.</p>
+                <div id="lead7-progress-bar-wrap" style="margin-bottom: 20px;"></div>
+                <div id="lead7-days-list"></div>
+                <div id="lead7-day-content" class="hidden"></div>
+                <div id="lead7-promo-wrap" class="hidden"></div>
+            </div>
+
             <!-- Course Content Card -->
             <div class="card hidden" id="course-content-card">
                 <h3><span class="card-icon">📖</span>Содержание программы</h3>
@@ -624,12 +635,25 @@
         // Use the API base and mock settings from config.js
         const APP_CONFIG = window.APP_CONFIG || {};
         const API_BASE = APP_CONFIG.API_BASE || 'http://127.0.0.1:8001';
+        const LEAD7_BASE = APP_CONFIG.LEAD7_WEBHOOK_BASE || '';
         const MOCK_MODE = !!APP_CONFIG.MOCK_MODE;
         let currentToken = null;
         let currentUser = null;
         let currentCourse = null;
         let currentTheme = 'light';
+        let lead7Progress = { days: [] };
         
+        // Контент 7 дней (кратко; полный — в БД lead7_day_content)
+        const LEAD7_DAYS = [
+            { day: 1, title: 'Вода и утренняя рутина' },
+            { day: 2, title: 'Белок и завтрак' },
+            { day: 3, title: 'Эмоциональная осознанность' },
+            { day: 4, title: 'Углеводы: друг или враг?' },
+            { day: 5, title: 'Движение и энергия' },
+            { day: 6, title: 'Осознанное питание' },
+            { day: 7, title: 'Распознавание стресс-еды' }
+        ];
+
         // Simple mock data for demo mode (when backend is not available)
         const MOCK_PROGRAMS = [
             {
@@ -696,6 +720,10 @@
                     // Показываем курсы без проверки аутентификации
                     document.getElementById('my-courses-card').classList.remove('hidden');
                     loadMyCourses();
+                    break;
+                case 'lead7':
+                    document.getElementById('lead7-card').classList.remove('hidden');
+                    loadLead7();
                     break;
                 case 'admin':
                     // Показываем админ панель без проверки аутентификации
@@ -1052,6 +1080,123 @@
                 }
             } catch (error) {
                 document.getElementById('my-courses-list').innerHTML = `<div class="status error">❌ Ошибка загрузки: ${error.message}</div>`;
+            }
+        }
+
+        // ——— Марафон 7 дней (n8n) ———
+        function getLead7UserId() {
+            let id = localStorage.getItem('lead7_user_id');
+            if (!id) {
+                id = crypto.randomUUID ? crypto.randomUUID() : 'web-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+                localStorage.setItem('lead7_user_id', id);
+            }
+            return id;
+        }
+
+        async function loadLead7() {
+            const wrap = document.getElementById('lead7-days-list');
+            const contentWrap = document.getElementById('lead7-day-content');
+            const promoWrap = document.getElementById('lead7-promo-wrap');
+            contentWrap.classList.add('hidden');
+            contentWrap.innerHTML = '';
+            promoWrap.classList.add('hidden');
+            promoWrap.innerHTML = '';
+
+            if (!LEAD7_BASE) {
+                wrap.innerHTML = '<p style="color: var(--text-secondary);">Марафон не настроен (LEAD7_WEBHOOK_BASE). Работает только при подключённом n8n.</p>';
+                return;
+            }
+
+            const externalId = getLead7UserId();
+            try {
+                const res = await fetch(LEAD7_BASE + '/lead7/progress?external_id=' + encodeURIComponent(externalId));
+                const data = await res.json().catch(() => ({}));
+                lead7Progress = data.days || [];
+            } catch (e) {
+                lead7Progress = [];
+            }
+
+            const passedSet = new Set((lead7Progress || []).filter(d => d.is_test_passed).map(d => d.day_number));
+            const nextDay = [1,2,3,4,5,6,7].find(d => !passedSet.has(d)) || 8;
+
+            let html = '<div class="progress-bar" style="margin-bottom:16px"><div class="progress-fill" style="width:' + (passedSet.size / 7 * 100) + '%"></div></div>';
+            html += '<p style="margin-bottom:16px; color: var(--text-secondary);">Пройдено дней: <strong>' + passedSet.size + ' / 7</strong></p>';
+            html += '<div style="display:flex; flex-wrap: wrap; gap: 8px;">';
+            LEAD7_DAYS.forEach(function(d) {
+                const done = passedSet.has(d.day);
+                const available = d.day <= nextDay;
+                html += '<button class="btn ' + (done ? 'btn-success' : '') + '" ' + (available ? '' : 'disabled') + ' onclick="openLead7Day(' + d.day + ')">День ' + d.day + ': ' + d.title + (done ? ' ✓' : '') + '</button>';
+            });
+            html += '</div>';
+            wrap.innerHTML = html;
+
+            document.getElementById('lead7-progress-bar-wrap').innerHTML = '';
+            if (passedSet.size === 7) {
+                promoWrap.classList.remove('hidden');
+                promoWrap.innerHTML = '<button class="btn btn-success" onclick="requestLead7Promo()">Получить промокод 10%</button><div id="lead7-promo-result" style="margin-top:12px;"></div>';
+            }
+        }
+
+        function openLead7Day(dayNum) {
+            const day = LEAD7_DAYS.find(d => d.day === dayNum);
+            if (!day) return;
+            const contentWrap = document.getElementById('lead7-day-content');
+            contentWrap.classList.remove('hidden');
+            const passedSet = new Set((lead7Progress || []).filter(d => d.is_test_passed).map(d => d.day_number));
+            contentWrap.innerHTML = '<h4>День ' + dayNum + ': ' + day.title + '</h4>' +
+                '<p style="color: var(--text-secondary); margin: 16px 0;">Изучите материалы дня и пройдите мини-тест.</p>' +
+                '<button class="btn btn-success" onclick="saveLead7Day(' + dayNum + ', true)">Отметить день пройденным</button> ' +
+                '<button class="btn btn-secondary" onclick="document.getElementById(\'lead7-day-content\').classList.add(\'hidden\'); document.getElementById(\'lead7-day-content\').innerHTML=\'\';">Закрыть</button>';
+        }
+
+        async function saveLead7Day(dayNum, isTestPassed) {
+            if (!LEAD7_BASE) { showToast('Марафон не настроен.', 'error'); return; }
+            try {
+                const res = await fetch(LEAD7_BASE + '/lead7/progress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        external_id: getLead7UserId(),
+                        channel: 'web',
+                        day_number: dayNum,
+                        is_test_passed: !!isTestPassed
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok !== false) {
+                    showToast('День ' + dayNum + ' отмечен пройденным.');
+                    document.getElementById('lead7-day-content').classList.add('hidden');
+                    document.getElementById('lead7-day-content').innerHTML = '';
+                    loadLead7();
+                } else {
+                    showToast(data.error || 'Ошибка сохранения', 'error');
+                }
+            } catch (e) {
+                showToast('Ошибка сети: ' + e.message, 'error');
+            }
+        }
+
+        async function requestLead7Promo() {
+            if (!LEAD7_BASE) { showToast('Марафон не настроен.', 'error'); return; }
+            const el = document.getElementById('lead7-promo-result');
+            if (el) el.textContent = 'Запрос...';
+            try {
+                const res = await fetch(LEAD7_BASE + '/lead7/finish', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ external_id: getLead7UserId() })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok && data.promo_code) {
+                    if (el) el.innerHTML = '<strong style="color: var(--success);">Ваш промокод: ' + data.promo_code + '</strong> (скидка ' + (data.discount_percent || 10) + '%)';
+                    showToast('Промокод получен!');
+                } else {
+                    if (el) el.innerHTML = '<span style="color: var(--text-secondary);">' + (data.error || 'Не все дни пройдены') + '</span>';
+                    showToast(data.error || 'Сначала пройдите все 7 дней', 'error');
+                }
+            } catch (e) {
+                if (el) el.textContent = '';
+                showToast('Ошибка: ' + e.message, 'error');
             }
         }
         
