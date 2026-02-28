@@ -58,24 +58,22 @@ The project has been updated to implement a flexible webinar lead magnet (former
 
 ## Frontend Application
 
-**Основной фронтенд (React, Vite, shadcn/ui)** — в папке `frontend/`:
+**Фронтенд (React, Vite, shadcn/ui)** — в **корне репо**:
 - Лендинг, кабинет студента (каталог, мои курсы, **марафон 7 дней**, завершённые)
-- Марафон 7 дней работает через n8n (webhook'и). Конфиг: `VITE_LEAD7_WEBHOOK_BASE`
-- Админ-панель (конструктор курсов)
+- Марафон 7 дней через n8n. Конфиг: `VITE_LEAD7_WEBHOOK_BASE`
+- Админ: `/admin`
 - Адаптивная вёрстка, mobile-first
 
-Запуск локально:
+Локально:
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
+http://localhost:3000
 
-Откроется http://localhost:3000
+**Vercel:** Root Directory оставь пустым, сборка из корня (см. [VERCEL_SETUP.md](VERCEL_SETUP.md)).
 
-**Vercel:** в настройках проекта укажи **Root Directory: `frontend`** (см. [VERCEL_SETUP.md](VERCEL_SETUP.md)). Корневой vercel.json не используем.
-
-Старый SPA (Vanilla) сохранён в `src/frontend/` для справки.
+Старый SPA и бэкенд — в `_old_src/frontend/` и `_old_src/backend/`.
 
 ## Deployment
 

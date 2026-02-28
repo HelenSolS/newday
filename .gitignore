@@ -3,5 +3,15 @@
 __pycache__/
 *.pyc
 ._*
-src/backend/data/*.db.env
-.env
+_old_src/backend/data/*.db.env
+
+# Frontend (Vite/React)
+node_modules
+dist
+dist-ssr
+*.local
+logs
+*.log
+
+# Reference clone (not part of the app)
+marathon-craft-ref/

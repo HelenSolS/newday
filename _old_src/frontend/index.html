@@ -73,9 +73,13 @@
 
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: 1fr;
             gap: 24px;
             margin-bottom: 40px;
+        }
+        .dashboard .card:not(.hidden) {
+            grid-column: 1;
+            max-width: 100%;
         }
 
         .card {
@@ -696,9 +700,10 @@
         
         // Tab management
         function switchTab(tabName) {
-            // Update nav tabs
+            // Update nav tabs (currentTarget — всегда кнопка, даже при клике по иконке/тексту внутри)
             document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
+            const btn = event && event.currentTarget;
+            if (btn) btn.classList.add('active');
             
             // Show/hide cards based on tab and auth state
             const isAuthenticated = currentToken !== null;
