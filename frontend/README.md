@@ -17,10 +17,9 @@ npm run dev
 npm run build
 ```
 
-В Vercel укажи:
-- **Root Directory:** `frontend`
-- **Build Command:** `npm run build`
-- **Output Directory:** `dist`
+**Важно для Vercel:** в настройках проекта (Settings → General) укажи **Root Directory: `frontend`**. Тогда сборка пойдёт из папки frontend, и не будет ошибки «frontend: No such file or directory».
+
+Либо без Root Directory: Build Command — `cd frontend && npm run build`, Output — `frontend/dist`, Install — `cd frontend && npm install`.
 
 ## Переменные окружения
 
