@@ -58,23 +58,24 @@ The project has been updated to implement a flexible webinar lead magnet (former
 
 ## Frontend Application
 
-The frontend is a complete single-page application with:
-- User authentication (login/registration)
-- Program browsing and enrollment
-- Interactive course content
-- Progress tracking
-- Achievement system
-- Admin panel
-- Responsive design with dark/light themes
+**Основной фронтенд (React, Vite, shadcn/ui)** — в папке `frontend/`:
+- Лендинг, кабинет студента (каталог, мои курсы, **марафон 7 дней**, завершённые)
+- Марафон 7 дней работает через n8n (webhook'и). Конфиг: `VITE_LEAD7_WEBHOOK_BASE`
+- Админ-панель (конструктор курсов)
+- Адаптивная вёрстка, mobile-first
 
-To run the frontend development server:
+Запуск локально:
 ```bash
-cd src/frontend
+cd frontend
 npm install
-npm start
+npm run dev
 ```
 
-Then open http://localhost:3000 in your browser.
+Откроется http://localhost:3000
+
+Сборка для Vercel: в корне репо заданы `vercel.json` (output: `frontend/dist`, build/install из `frontend/`).
+
+Старый SPA (Vanilla) сохранён в `src/frontend/` для справки.
 
 ## Deployment
 
