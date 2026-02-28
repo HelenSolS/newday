@@ -73,7 +73,7 @@ npm run dev
 
 Откроется http://localhost:3000
 
-Сборка для Vercel: в корне репо заданы `vercel.json` (output: `frontend/dist`, build/install из `frontend/`).
+**Vercel:** в настройках проекта укажи **Root Directory: `frontend`** (см. [VERCEL_SETUP.md](VERCEL_SETUP.md)). Корневой vercel.json не используем.
 
 Старый SPA (Vanilla) сохранён в `src/frontend/` для справки.
 
